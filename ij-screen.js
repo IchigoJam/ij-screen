@@ -19,7 +19,7 @@ class IJScreen extends HTMLElement {
     for (let i = 0; i < sh; i++) {
       for (let j = 0; j < sw; j++) {
         const div = create("div", this);
-        //div.style.width = "1em";
+        div.style.width = "1em";
       }
     }
     this.cursorx = 0;
@@ -90,7 +90,7 @@ class IJScreen extends HTMLElement {
     }
     const div = this.querySelectorAll("div")[n];
     const c = div.textContent;
-    if (c == "" || c == "　") {
+    if (c == null || c == "" || c == "　") {
       return 0;
     }
     return c.charCodeAt(0);
