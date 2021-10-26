@@ -58,12 +58,22 @@ class IJScreen extends HTMLElement {
       }
       return;
     }
-    const n = this.cursorx + this.cursory * sw;
+    const limit = (n, min, max) => {
+      if (n < min) {
+        return min;
+      } else if (n > max) {
+        return max;
+      }
+      return n;
+    };
+    const x = limit(this.cursorx, 0, sw - 1);
+    const y = limit(this.cursory, 0, sh - 1);
+    const n = x + y * sw;
     const div = this.querySelectorAll("div")[n];
     div.textContent = c;
-    if (this.cursorx == sw - 1) {
+    if (x == sw - 1) {
       this.cursorx = 0;
-      if (this.cursory == sh - 1) {
+      if (y == sh - 1) {
         this.scrollUp();
       } else {
         this.cursory++;
@@ -85,6 +95,9 @@ class IJScreen extends HTMLElement {
     this.querySelectorAll("div").forEach(d => d.textContent = "");
   }
   scr(x, y) {
+    if (x < 0 || x >= sw || y < 0 || y >= sh) {
+      return 0;
+    }
     const n = x + y * sw;
     if (n < 0 || n >= sw * sh) {
       return 0;
