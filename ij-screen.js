@@ -112,7 +112,7 @@ class IJScreen extends HTMLElement {
   _putc(x, y, c) {
     const n = x + y * sw;
     const div = this.querySelectorAll("div")[n];
-    div.textContent = String.fromCharCode(c);
+    div.textContent = c == 0 ? "" : String.fromCharCode(c);
   }
   scrollUp() {
     for (let i = 0; i < sh - 1; i++) {
