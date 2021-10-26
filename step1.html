@@ -6,17 +6,10 @@ import { cls, lc, print, wait, btn, scr, rnd } from "https://ichigojam.github.io
 window.run = async () => {
   cls();
   let x = 15;
-  for (;;) {
-    lc(x, 5);
-    print("O");
-    lc(rnd(32), 23);
-    print("＊");
-    await wait(3);
-    x = x - btn(28) + btn(29);
-    if (scr(x, 5)) {
-      break;
-    }
-  }
+  lc(x, 5);
+  print("O");
+  lc(rnd(32), 23);
+  print("＊");
 };
 </script>
 </body>

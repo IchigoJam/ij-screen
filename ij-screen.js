@@ -18,7 +18,8 @@ class IJScreen extends HTMLElement {
 
     for (let i = 0; i < sh; i++) {
       for (let j = 0; j < sw; j++) {
-        create("div", this);
+        const div = create("div", this);
+        //div.style.width = "1em";
       }
     }
     this.cursorx = 0;
@@ -80,7 +81,7 @@ class IJScreen extends HTMLElement {
     this.putc("\n");
   }
   cls() {
-    this.querySelectorAll("div").forEach(d => d.textContent = "　");
+    this.querySelectorAll("div").forEach(d => d.textContent = "");
   }
   scr(x, y) {
     const n = x + y * sw;
@@ -89,7 +90,7 @@ class IJScreen extends HTMLElement {
     }
     const div = this.querySelectorAll("div")[n];
     const c = div.textContent;
-    if (c == "　") {
+    if (c == "" || c == "　") {
       return 0;
     }
     return c.charCodeAt(0);
