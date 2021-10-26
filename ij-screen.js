@@ -9,17 +9,18 @@ const sh = 24;
 class IJScreen extends HTMLElement {
   constructor() {
     super();
-    this.style.display = "grid";
+    this.style.display = "inline-grid";
     this.style.gridTemplateColumns = `repeat(${sw}, 1fr)`;
     this.style.backgroundColor = "black";
     this.style.color = "white";
-    this.style.fontSize = "calc(100vw/64)";
+    this.style.fontSize = "calc(100vw/40)";
     //this.style.border = "1px solid white";
 
     for (let i = 0; i < sh; i++) {
       for (let j = 0; j < sw; j++) {
         const div = create("div", this);
         div.style.width = "1em";
+        div.style.height = "1em";
       }
     }
     this.cursorx = 0;
