@@ -5,8 +5,13 @@ import { ij } from "https://js.sabae.cc/ij.js";
 window.run = async () => {
   ij.cls();
   let x = 15;
-  ij.lc(x, 5);
-  ij.print("O");
+  for (;;) {
+    ij.lc(x, 5);
+    ij.print("O");
+    ij.lc(ij.rnd(32), 23);
+    ij.print("＊");
+    await ij.wait(3);
+  }
 };
 
 </script>

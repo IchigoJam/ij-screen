@@ -1,28 +1,15 @@
-<html>
-<body>
 <script type="module">
-import {
-  cls, lc, print, wait, btn, scr, rnd
-} from "https://ichigojam.github.io/ij-screen/ij.js";
+
+import { ij } from "https://js.sabae.cc/ij.js";
 
 window.run = async () => {
-
-  cls();
+  ij.cls();
   let x = 15;
-  for (;;) {
-    lc(x, 5);
-    print("O");
-    lc(rnd(32), 23);
-    print("＊");
-    await wait(3);
-    x = x - btn(28) + btn(29);
-    x = x & 31;
-    if (scr(x, 5)) {
-      break;
-    }
-  }
-
+  ij.lc(x, 5);
+  ij.print("O");
+  ij.lc(ij.rnd(32), 23);
+  ij.print("*");
 };
+
 </script>
-</body>
-</html>
+
