@@ -1,5 +1,6 @@
 import { create } from "https://js.sabae.cc/stdcomp.js";
 import { rnd } from "https://js.sabae.cc/rnd.js";
+import { css } from "https://js.sabae.cc/css.js";
 
 //const screen = new Array(32 * 24);
 
@@ -9,10 +10,12 @@ const sh = 24;
 class IJScreen extends HTMLElement {
   constructor() {
     super();
+    css("./ichigojam-font.css");
     this.style.display = "inline-grid";
     this.style.gridTemplateColumns = `repeat(${sw}, 1fr)`;
     this.style.backgroundColor = "black";
     this.style.color = "white";
+    this.style.fontFamily = "ichigojam";
     this.style.fontSize = "calc(100vw/40)";
     //this.style.border = "1px solid white";
 

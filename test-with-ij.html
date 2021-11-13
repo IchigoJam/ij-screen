@@ -1,0 +1,28 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+
+<script type="module">
+import { ij } from "./ij.js";
+
+window.run = async () => {
+  ij.cls();
+  let x = 15;
+  for (;;) {
+    ij.lc(x, 5);
+    ij.print("O");
+    ij.lc(ij.rnd(32), 23);
+    ij.print("＊");
+    await ij.wait(3);
+    x = x - ij.btn(28) + ij.btn(29);
+    if (ij.scr(x, 5)) {
+      break;
+    }
+  }
+};
+
+const sample = async () => {
+  for (let i = 0; i < 1000; i++) {
+    ij.print("IchigoJam BASIC " + i);
+    await ij.wait(5);
+  }
+}
+</script>
