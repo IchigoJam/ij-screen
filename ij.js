@@ -1,10 +1,10 @@
 import { IJScreen } from "./ij-screen.js";
 
-let ij;
+let ijs;
 
 onload = () => {
-  ij = new IJScreen();
-  document.body.appendChild(ij);
+  ijs = new IJScreen();
+  document.body.appendChild(ijs);
   let t = setInterval(() => {
     if (window.run) {
       window.run();
@@ -13,14 +13,17 @@ onload = () => {
   }, 100);
 };
 
-const cls = () => ij?.cls();
-const lc = (x, y) => ij?.lc(x, y);
-const print = (s) => ij?.print(s);
-const wait = async (n) => await ij?.wait(n);
-const btn = (n) => ij?.btn(n);
-const scr = (x, y) => ij?.scr(x, y);
-const rnd = (n) => ij?.rnd(n);
+const cls = () => ijs?.cls();
+const lc = (x, y) => ijs?.lc(x, y);
+const print = (s) => ijs?.print(s);
+const wait = async (n) => await ijs?.wait(n);
+const btn = (n) => ijs?.btn(n);
+const scr = (x, y) => ijs?.scr(x, y);
+const rnd = (n) => ijs?.rnd(n);
+
+const ij = { cls, lc, print, wait, btn, scr, rnd };
 
 export {
   cls, lc, print, wait, btn, scr, rnd,
+  ij
 };
