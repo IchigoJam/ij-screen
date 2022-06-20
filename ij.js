@@ -1,17 +1,7 @@
 import { IJScreen } from "./ij-screen.js";
 
-let ijs;
-
-onload = () => {
-  ijs = new IJScreen();
-  document.body.appendChild(ijs);
-  let t = setInterval(() => {
-    if (window.run) {
-      window.run();
-      clearInterval(t);
-    }
-  }, 100);
-};
+const ijs = new IJScreen();
+document.body.appendChild(ijs);
 
 const cls = () => ijs?.cls();
 const lc = (x, y) => ijs?.lc(x, y);
@@ -22,6 +12,13 @@ const scr = (x, y) => ijs?.scr(x, y);
 const rnd = (n) => ijs?.rnd(n);
 
 const ij = { cls, lc, print, wait, btn, scr, rnd };
+
+let t = setInterval(() => {
+  if (window.run) {
+    window.run();
+    clearInterval(t);
+  }
+}, 100);
 
 export {
   cls, lc, print, wait, btn, scr, rnd,
