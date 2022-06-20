@@ -1,21 +1,16 @@
 <script type="module">
+import { print, lc, rnd, wait, btn, scr } from "https://js.sabae.cc/ij.js";
 
-import { ij } from "https://js.sabae.cc/ij.js";
-
-window.run = async () => {
-  ij.cls();
-  let x = 15;
-  for (;;) {
-    ij.lc(x, 5);
-    ij.print("O");
-    ij.lc(ij.rnd(32), 23);
-    ij.print("*");
-    await ij.wait(3);
-    x = x - ij.btn(28) + ij.btn(29);
-    if (ij.scr(x, 5)) {
-      break;
-    }
+let x = 15;
+for (;;) {
+  lc(x, 5);
+  print("O");
+  lc(rnd(32), 23);
+  print("*");
+  await wait(3);
+  x = x - btn(28) + btn(29);
+  if (scr(x, 5)) {
+    break;
   }
-};
-
+}
 </script>

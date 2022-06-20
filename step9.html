@@ -3,28 +3,24 @@
 <head><title>kawakudari.js</title></head>
 <body>
 <script type="module">
+import { print, lc, rnd, wait, btn, scr, cls } from "https://js.sabae.cc/ij.js";
 
-import { ij } from "https://ichigojam.github.io/ij-screen/ij.js";
-
-window.run = async () => {
-  ij.cls();
+for (;;) {
+  cls();
   let x = 15;
   for (;;) {
-    ij.lc(x, 5);
-    ij.print("O");
-    ij.lc(ij.rnd(32), 23);
-    ij.print("*");
-    await ij.wait(3);
-    x = x - ij.btn(28) + ij.btn(29);
-    x = x & 31;
-    if (ij.scr(x, 5)) {
+    lc(x, 5);
+    print("O");
+    lc(rnd(32), 23);
+    print("*");
+    await wait(3);
+    x = x - btn(28) + btn(29);
+    if (scr(x, 5)) {
       break;
     }
   }
-  await ij.wait(30);
-  window.run();
+  await wait(30);
 };
-
 </script>
 </body>
 </html>
