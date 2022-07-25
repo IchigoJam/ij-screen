@@ -103,6 +103,9 @@ class IJScreen extends HTMLElement {
     return rnd(n);
   }
   print(s) {
+    if (typeof s != "string") {
+      s = "" + s;
+    }
     for (const c of s) {
       this.putc(c);
     }
