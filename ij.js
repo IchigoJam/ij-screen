@@ -10,8 +10,9 @@ const wait = async (n) => await ijs?.wait(n);
 const btn = (n) => ijs?.btn(n);
 const scr = (x, y) => ijs?.scr(x, y);
 const rnd = (n) => ijs?.rnd(n);
+const ana = (n) => ijs?.ana(n);
 
-const ij = { cls, lc, print, wait, btn, scr, rnd };
+const ij = { cls, lc, print, wait, btn, scr, rnd, ana };
 
 let t = setInterval(() => {
   if (window.run) {
@@ -21,6 +22,6 @@ let t = setInterval(() => {
 }, 100);
 
 export {
-  cls, lc, print, wait, btn, scr, rnd,
+  cls, lc, print, wait, btn, scr, rnd, ana,
   ij
 };

@@ -45,6 +45,20 @@ class IJScreen extends HTMLElement {
         this.keyleft = false;
       }
     };
+    this.ana0 = 0;
+    this.ana2 = 0;
+    const fit = (n) => {
+      if (n < 0) {
+        n = 0;
+      } else if (n > 1) {
+        n = 1;
+      }
+      return (n * 1023) >> 0;
+    };
+    this.onmousemove = (e) => {
+      this.ana0 = fit((e.clientX - this.offsetLeft) / this.clientWidth);
+      this.ana2 = fit((e.clientY - this.offsetTop) / this.clientHeight);
+    };
     this.cls();
   }
   lc(x, y) {
@@ -67,7 +81,7 @@ class IJScreen extends HTMLElement {
       } else if (n > max) {
         return max;
       }
-      return n;
+      return n >> 0;
     };
     const x = limit(this.cursorx, 0, sw - 1);
     const y = limit(this.cursory, 0, sh - 1);
@@ -101,7 +115,7 @@ class IJScreen extends HTMLElement {
     if (x < 0 || x >= sw || y < 0 || y >= sh) {
       return 0;
     }
-    const n = x + y * sw;
+    const n = (x >> 0) + (y >> 0) * sw;
     if (n < 0 || n >= sw * sh) {
       return 0;
     }
@@ -136,6 +150,14 @@ class IJScreen extends HTMLElement {
     } else if (code == 29) {
       return this.keyright;
     }
+  }
+  ana(n = 0) {
+    if (n == 0) {
+      return this.ana0;
+    } else if (n == 2) {
+      return this.ana2;
+    }
+    return 0;
   }
 };
 
