@@ -1,8 +1,8 @@
 <html>
 <body>
 <script type="module">
-//import { cls, lc, print, wait, btn, scr, rnd } from "https://ichigojam.github.io/ij-screen/ij.js";
-import { cls, lc, print, wait, btn, scr, rnd } from "./ij.js";
+import { cls, lc, print, wait, btn, scr, rnd } from "https://ichigojam.github.io/ij-screen/ij.js";
+//import { cls, lc, print, wait, btn, scr, rnd } from "./ij.js";
 
 cls();
 let x = 15;
@@ -10,7 +10,7 @@ for (;;) {
   lc(x, 5);
   print("O");
   lc(rnd(32), 23);
-  print("＊");
+  print("X");
   await wait(3);
   x = x - btn(28) + btn(29);
   if (scr(x, 5)) {
