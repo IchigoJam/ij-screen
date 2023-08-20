@@ -10,7 +10,8 @@ const sh = 24;
 class IJScreen extends HTMLElement {
   constructor() {
     super();
-    css("./ichigojam-font.css");
+    //css("./ichigojam-font.css");
+    css("https://ichigojam.github.io/ij-screen/ichigojam-font.css");
     this.style.display = "inline-grid";
     this.style.gridTemplateColumns = `repeat(${sw}, 1fr)`;
     this.style.backgroundColor = "black";
