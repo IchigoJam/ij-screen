@@ -16,15 +16,16 @@ class IJScreen extends HTMLElement {
     this.style.gridTemplateColumns = `repeat(${sw}, 1fr)`;
     this.style.backgroundColor = "black";
     this.style.color = "white";
-    this.style.fontFamily = "ichigojam";
+    //this.style.fontFamily = "ichigojam";
+    this.style.fontFamily = "ichigojam-font";
     this.style.fontSize = "calc(100vw/40)";
     //this.style.border = "1px solid white";
 
     for (let i = 0; i < sh; i++) {
       for (let j = 0; j < sw; j++) {
         const div = create("div", this);
-        div.style.width = "1em";
-        div.style.height = "1em";
+        div.style.width = ".8em";
+        div.style.height = ".8em";
       }
     }
     this.cursorx = 0;
@@ -66,6 +67,22 @@ class IJScreen extends HTMLElement {
     this.cursorx = x;
     this.cursory = y;
   }
+  _setChar(div, c) {
+    const b = c.charCodeAt(0);
+    /*
+    if (b >= 0xc0 && b <= 0xff) {
+      const off = b >= 0xc0 && b < 0xc0 + 10 ? "0" : "a";
+    console.log(c, b, off);
+
+      const c2 = String.fromCharCode(off.charCodeAt(0) + (b - 0xc0));
+      div.style.fontFamily = "ichigojam-font";
+      div.textContent = c2;
+    } else {
+      */
+      //div.style.fontFamily = "ichigojam";
+      div.textContent = c;
+    //}
+  }
   putc(c) {
     if (c == "\n") {
       this.cursorx = 0;
@@ -88,7 +105,7 @@ class IJScreen extends HTMLElement {
     const y = limit(this.cursory, 0, sh - 1);
     const n = x + y * sw;
     const div = this.querySelectorAll("div")[n];
-    div.textContent = c;
+    this._setChar(div, c);
     if (x == sw - 1) {
       this.cursorx = 0;
       if (y == sh - 1) {
