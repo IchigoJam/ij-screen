@@ -1,0 +1,445 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
+<title>test-glsl</title>
+</head><body>
+
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+}
+</style>
+
+<canvas id="canvas"></canvas>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec3 aPosition;
+attribute vec2 aTextureCoordinate;
+
+varying vec2 vTextureCoordinate;
+
+void main() {
+  vTextureCoordinate = aTextureCoordinate;
+  gl_Position = vec4(aPosition, 1.0);
+}
+</script>
+
+<script id="initialize-shader" type="x-shader/x-fragment">
+precision mediump float;
+
+uniform vec2 uOffset;
+
+varying vec2 vTextureCoordinate;
+
+float random(vec2 st) {
+  return fract(sin(dot(st, vec2(12.9898,78.233))) * 43758.5453123);
+}
+
+void main() {
+  gl_FragColor = random((gl_FragCoord.xy + uOffset) * 0.001) < 0.5 ? vec4(1.0, 0.3, 0.3, 1.0) : vec4(0.0, 0.0, 0.0, 1.0);
+}
+</script>
+
+<script id="update-shader" type="x-shader/x-fragment">
+precision mediump float;
+
+uniform sampler2D aTexture;
+uniform vec2 uResolution;
+
+varying vec2 vTextureCoordinate;
+
+void main() {
+  vec2 scale = 1.0 / uResolution;
+  bool isAlive = texture2D(aTexture, gl_FragCoord.xy * scale).r < 0.5 ? false : true;
+  int sum = 0;
+  sum += texture2D(aTexture, (gl_FragCoord.xy + vec2(-1.0,  1.0)) * scale).r < 0.5 ? 0 : 1;
+  sum += texture2D(aTexture, (gl_FragCoord.xy + vec2( 0.0,  1.0)) * scale).r < 0.5 ? 0 : 1;
+  sum += texture2D(aTexture, (gl_FragCoord.xy + vec2( 1.0,  1.0)) * scale).r < 0.5 ? 0 : 1;
+  sum += texture2D(aTexture, (gl_FragCoord.xy + vec2(-1.0,  0.0)) * scale).r < 0.5 ? 0 : 1;
+  sum += texture2D(aTexture, (gl_FragCoord.xy + vec2( 1.0,  0.0)) * scale).r < 0.5 ? 0 : 1;
+  sum += texture2D(aTexture, (gl_FragCoord.xy + vec2(-1.0, -1.0)) * scale).r < 0.5 ? 0 : 1;
+  sum += texture2D(aTexture, (gl_FragCoord.xy + vec2( 0.0, -1.0)) * scale).r < 0.5 ? 0 : 1;
+  sum += texture2D(aTexture, (gl_FragCoord.xy + vec2( 1.0, -1.0)) * scale).r < 0.5 ? 0 : 1;
+
+  gl_FragColor = ((isAlive && (sum == 2 || sum == 3)) || (!isAlive && sum == 3)) ? vec4(1.0, 0.2, 0.6, 1.0) : vec4(0.0, 0.0, 0.0, 1.0);
+
+}
+</script>
+
+<script id="render-shader" type="x-shader/x-fragment">
+precision mediump float;
+
+uniform sampler2D aTexture;
+uniform sampler2D aTexture2;
+
+varying vec2 vTextureCoordinate;
+
+uniform vec2 uResolution;
+
+void main() {
+  float w = min(uResolution.x, uResolution.y);
+  float ox = (uResolution.x - w) / 2.0 / uResolution.y;
+  float oy = (uResolution.y - w) / 2.0 / uResolution.x;
+  float x = vTextureCoordinate.x / w * uResolution.x - ox;
+  float y = vTextureCoordinate.y / w * uResolution.y - oy;
+  if (x >= 0.0 && x < 1.0 && y >= 0.0 && y < 1.0) {
+    gl_FragColor = texture2D(aTexture2, vec2(x, y)) * texture2D(aTexture, vTextureCoordinate);
+  } else {
+    gl_FragColor = vec4(0., 0., 0., 1.);
+  }
+  /*
+  int x = int(vTextureCoordinate.x) / 32;
+  int y = int(vTextureCoordinate.y) / 24;
+  int idx = 255; //int(floor(texture2D(aTexture, vec2(float(x), float(y))).r * 255.0));
+  int x1 = mm(vTextureCoordinate.x, 8.0);
+  int y1 = mm(vTextureCoordinate.y, 8.0);
+  int xc = mm(float(idx), 16.0);
+  int yc = idx / 16;
+  int xc = mm(vTextureCoordinate.x, 160.0);
+  int yc = mm(vTextureCoordinate.y, 160.0);
+  gl_FragColor = texture2D(aTexture2, vec2(vTextureCoordinate.x / 1.0, vTextureCoordinate.y / 2.0));
+  //gl_FragColor = texture2D(aTexture2, vec2(xc * 8 + x1, yc * 8 + y1));
+  //gl_FragColor = texture2D(aTexture2, vec2(vTextureCoordinate);
+  */
+}
+</script>
+
+<script type="module">
+import { waitImageLoad } from "https://js.sabae.cc/waitImageLoad.js";
+
+// creates a shader
+// @param [WebGLRenderingContext] gl
+// @param [String] id - id of a element which has shader source
+// @return [WebGLShader]
+function createShader(gl, id) {
+  const elem = document.getElementById(id);
+  if (!elem) {
+    throw new Error('Can not find element "'  + id + '"')
+  }
+
+  const type = elem.type === 'x-shader/x-vertex' ? gl.VERTEX_SHADER :
+                elem.type === 'x-shader/x-fragment' ? gl.FRAGMENT_SHADER : null;
+  if (!type) {
+    throw new Error('Can not math shader type"' + elem.type + '"')
+  }
+
+  const shader = gl.createShader(type);
+  gl.shaderSource(shader, elem.text);
+  gl.compileShader(shader);
+
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    throw new Error('Can not compile shader sourde (' + gl.getShaderInfoLog(shader) + ')');
+  }
+
+  return shader;
+}
+
+// creates a program
+// @param [WebGLRenderingContext] gl
+// @param [WebGLShader] vertexShader
+// @param [WebGLShader] fragmentShader
+// @return [WebGLProgram]
+function createProgram(gl, vertexShader, fragmentShader) {
+  const program = gl.createProgram();
+
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    throw new Error('Can not link program(' + gl.getProgramParameter(program) + ')');
+  }
+
+  return program;
+}
+
+// creates an array buffer
+// @param [WebGLRenderingContext] gl
+// @param [Array<Number>] array
+// @param [WebGLBuffer]
+function createArrayBuffer(gl, array) {
+  const buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(array), gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  return buffer;
+}
+
+const createArrayBufferInt = (gl, array) => {
+  const buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Int32Array(array), gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  return buffer;
+}
+
+// sets attributes
+// @param [WebGLRenderingContext] gl
+// @param [Object] attributes
+function setAttributes(gl, attributes) {
+  Object.keys(attributes).forEach((name) => {
+    const attribute = attributes[name];
+    gl.bindBuffer(gl.ARRAY_BUFFER, attribute.buffer);
+    gl.enableVertexAttribArray(attribute.location);
+    gl.vertexAttribPointer(attribute.location, attribute.size, gl.FLOAT, false, 0, 0);
+  });
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+}
+
+// creates a framebuffer
+// @param [WebGLRenderingContext] gl
+// @param [Number] width
+// @param [Number] height
+// @return [Object]
+const createFrameBuffer = (gl, width, height) => {
+  const frameBuffer = gl.createFramebuffer();
+  const texture = gl.createTexture();
+
+  gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+
+  gl.bindTexture(gl.TEXTURE_2D, null);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+  return { frameBuffer, texture };
+};
+
+const deleteFrameBuffer = (gl, obj) => {
+  gl.deleteFramebuffer(obj.frameBuffer);
+  gl.deleteTexture(obj.texture);
+};
+const remakeFrameBuffer = (gl, obj, width, height) => {
+  if (obj) {
+    deleteFrameBuffer(gl, obj);
+  }
+  return createFrameBuffer(gl, width, height);
+};
+
+const createImageFromImageData = async (imagedata) => {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = imagedata.width;
+  canvas.height = imagedata.height;
+  ctx.putImageData(imagedata, 0, 0);
+  const image = new Image();
+  image.src = canvas.toDataURL();
+  await waitImageLoad(image);
+  return image;
+};
+
+const createTextureFromImage = (gl, image) => {
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+  return texture;
+};
+
+const createImageSample = async () => {
+  const imgd = new ImageData(256, 256);
+  for (let y = 0; y < 256; y++) {
+    for (let x = 0; x < 256; x++) {
+      const r = x;
+      const g = y;
+      const b = 0;
+      imgd.data[(x + y * 256) * 4] = r;
+      imgd.data[(x + y * 256) * 4 + 1] = g;
+      imgd.data[(x + y * 256) * 4 + 2] = 0;
+      imgd.data[(x + y * 256) * 4 + 3] = 255;
+    }
+  }
+  return await createImageFromImageData(imgd);
+};
+const createImageIchigoJamFont = async () => {
+  const font = await (await fetch("./ichigojam-font.json")).json();
+  const imgd = new ImageData(16 * 8, 16 * 8);
+  for (let i = 0; i < 256; i++) {
+    const f = font[i];
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        const flg = !!(parseInt(f.substring(y * 2, y * 2 + 2), 16) & (1 << (7 - x)));
+        const x1 = (i % 16) * 8 + x;
+        const y1 = (16 * 8 - 1) - ((i >> 4) * 8 + y);
+        let idx = (x1 + y1 * (16 * 8)) * 4;
+        const r = flg ? 255 : 0;
+        const g = flg ? 255 : 0;
+        const b = flg ? 255 : 0;
+        const a = flg ? 255 : 255;
+        imgd.data[idx++] = r;
+        imgd.data[idx++] = g;
+        imgd.data[idx++] = b;
+        imgd.data[idx++] = a;
+      }
+    }
+  }
+  return await createImageFromImageData(imgd);
+};
+const createTextureSample = async (gl) => {
+//  return createTextureFromImage(gl, await createImageSample());
+  return createTextureFromImage(gl, await createImageIchigoJamFont());
+};
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const canvas = document.getElementById('canvas');
+  const resizeCanvas = () => {
+    const ratio = devicePixelRatio;
+    canvas.width = innerWidth * ratio;
+    canvas.height = innerHeight * ratio;
+    canvas.style.width = innerWidth + "px";
+    canvas.style.height = innerHeight + "px";
+    console.log(canvas.width + "x" + canvas.height, canvas.width * canvas.height + "px")
+  };
+  resizeCanvas();
+
+  const gl = canvas.getContext('webgl');
+
+  const vertexShader = createShader(gl, 'vertex-shader');
+  const initializeShader = createShader(gl, 'initialize-shader');
+  const updateShader = createShader(gl, 'update-shader');
+  const renderShader = createShader(gl, 'render-shader');
+
+  const initializeProgram = createProgram(gl, vertexShader, initializeShader);
+  const updateProgram = createProgram(gl, vertexShader, updateShader);
+  const renderProgram = createProgram(gl, vertexShader, renderShader);
+
+  const position = [
+    -1.0,  1.0,  0.0,
+    -1.0, -1.0,  0.0,
+      1.0,  1.0,  0.0,
+      1.0, -1.0,  0.0
+  ];
+  const positionBuffer = createArrayBuffer(gl, position);
+
+  const texCoord = [
+    0.0, 1.0,
+    0.0, 0.0,
+    1.0, 1.0,
+    1.0, 0.0
+  ];
+  const texCoordBuffer = createArrayBuffer(gl, texCoord);
+
+  let prevFrameBufferObj = null;
+  let nextFrameBufferObj = null;
+  const makeFrameBuffers = () => {
+    prevFrameBufferObj = remakeFrameBuffer(gl, prevFrameBufferObj, canvas.width, canvas.height);
+    nextFrameBufferObj = remakeFrameBuffer(gl, nextFrameBufferObj, canvas.width, canvas.height);
+  };
+  makeFrameBuffers();
+
+  const vram = [];
+  for (let i = 0; i < 32 * 24; i++) {
+    vram[i] = Math.floor(Math.random() * 256);
+  }
+  const vramBuffer = createArrayBufferInt(gl, vram);
+  
+  const initField = () => {
+    gl.useProgram(initializeProgram);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, prevFrameBufferObj.frameBuffer);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    setAttributes(gl, {
+      aPosition: {
+        location: gl.getAttribLocation(initializeProgram, 'aPosition'),
+        size: 3,
+        buffer: positionBuffer
+      }
+    });
+    gl.uniform2fv(gl.getUniformLocation(initializeProgram, 'uOffset'), [Math.random() * canvas.width, Math.random() * canvas.height]);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.flush();
+  };
+  initField();
+
+  const texture2 = await createTextureSample(gl);
+
+  let requestResize = false;
+  const render = () => {
+    if (requestResize) {
+      requestResize = false;
+      resizeCanvas();
+      makeFrameBuffers();
+      initField();
+    }
+
+    gl.useProgram(updateProgram);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, nextFrameBufferObj.frameBuffer);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, prevFrameBufferObj.texture);
+    setAttributes(gl, {
+      aPosition: {
+        location: gl.getAttribLocation(updateProgram, 'aPosition'),
+        size: 3,
+        buffer: positionBuffer
+      }
+    });
+    gl.uniform1i(gl.getUniformLocation(updateProgram, 'uTexture'), 0);
+    gl.uniform2fv(gl.getUniformLocation(updateProgram, 'uResolution'), [canvas.width, canvas.height]);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.flush();
+
+    gl.useProgram(renderProgram);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+    //gl.uniform1iv(gl.getUniformLocation(renderProgram, 'vram'), vram);
+    gl.uniform2fv(gl.getUniformLocation(renderProgram, 'uResolution'), [canvas.width, canvas.height]);
+
+    gl.uniform1i(gl.getUniformLocation(renderProgram, 'aTexture'), 0);
+    gl.uniform1i(gl.getUniformLocation(renderProgram, 'aTexture2'), 1);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, nextFrameBufferObj.texture);
+    gl.activeTexture(gl.TEXTURE0 + 1);
+    gl.bindTexture(gl.TEXTURE_2D, texture2);
+
+    setAttributes(gl, {
+      aPosition: {
+        location: gl.getAttribLocation(renderProgram, 'aPosition'),
+        size: 3,
+        buffer: positionBuffer
+      },
+      aTextureCoordinate: {
+        location: gl.getAttribLocation(renderProgram, 'aTextureCoordinate'),
+        size: 2,
+        buffer: texCoordBuffer
+      }
+    });
+    gl.uniform1i(gl.getUniformLocation(updateProgram, 'uTexture'), 0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.flush();
+
+    [prevFrameBufferObj, nextFrameBufferObj] = [nextFrameBufferObj, prevFrameBufferObj];
+
+    requestAnimationFrame(render)
+  };
+
+  requestAnimationFrame(render);
+
+  window.addEventListener('resize', () => requestResize = true);
+  canvas.onmousedown = () => {
+    initField();
+    canvas.requestFullscreen();
+  };
+});
+</script>
+
+</body>
+</html>
