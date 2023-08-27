@@ -10,19 +10,28 @@ window.run = async () => {
     ij.lc(x, 5);
     ij.print("O");
     ij.lc(ij.rnd(32), 23);
-    ij.print("＊");
+    ij.print("*");
     await ij.wait(3);
     x = x - ij.btn(28) + ij.btn(29);
     if (ij.scr(x, 5)) {
       break;
     }
   }
+
+  /*
+  await sample();
+  */
 };
 
 const sample = async () => {
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 10; i++) {
     ij.print("IchigoJam BASIC " + i);
     await ij.wait(5);
   }
-}
+  await ij.print("1234567890", false);
+  for (let i = 0; i < 10; i++) {
+    await ij.wait(10);
+    await ij.print("\x08", false);
+  }
+};
 </script>

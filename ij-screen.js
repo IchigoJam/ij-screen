@@ -104,6 +104,14 @@ class IJScreen extends HTMLElement {
     const x = limit(this.cursorx, 0, sw - 1);
     const y = limit(this.cursory, 0, sh - 1);
     const n = x + y * sw;
+    if (c == "\x08") {
+      if (this.cursorx > 0) {
+        const div = this.querySelectorAll("div")[n - 1];
+        this._setChar(div, "");
+        this.cursorx--;
+      }
+      return;
+    }
     const div = this.querySelectorAll("div")[n];
     this._setChar(div, c);
     if (x == sw - 1) {
@@ -120,14 +128,16 @@ class IJScreen extends HTMLElement {
   rnd(n) {
     return rnd(n);
   }
-  print(s) {
+  print(s, ret = true) {
     if (typeof s != "string") {
       s = "" + s;
     }
     for (const c of s) {
       this.putc(c);
     }
-    this.putc("\n");
+    if (ret) {
+      this.putc("\n");
+    }
   }
   cls() {
     this.querySelectorAll("div").forEach(d => d.textContent = "");
